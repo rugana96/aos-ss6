@@ -1,0 +1,542 @@
+openapi: 3.0.3
+info:
+  title: "API Recambios: especificación"
+  description: "[UPM] AOS: API para la gestión del inventario de recambios de un taller"
+  version: "1.0"
+servers:
+- url: "{schema}://{server}:{port}/{basepath}"
+  description: Servidor local
+  variables:
+    schema:
+      description: Esquema
+      default: http
+      enum:
+      - http
+      - https
+    server:
+      description: Nombre del Servidor
+      default: 127.0.0.1
+    port:
+      description: Número de puerto
+      default: "8080"
+    basepath:
+      description: Ruta base
+      default: api/v1
+tags:
+- name: Recambios
+  description: Recambios de una pieza del taller
+paths:
+  /recambios:
+    get:
+      tags:
+      - Recambios
+      summary: Obtiene todas las piezas de recambio de un taller
+      operationId: upm_aos_recambios_cget
+      responses:
+        "200":
+          description: Array de recambios
+          headers:
+            ETag:
+              $ref: '#/components/headers/ETag'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_200'
+              examples:
+                recambiosExamples:
+                  $ref: '#/components/examples/Recambios'
+        "404":
+          description: "`NOT FOUND`: recurso no disponible"
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/HTTP_Problem'
+              examples:
+                response-http-404:
+                  $ref: '#/components/examples/response-http-404'
+      x-openapi-router-controller: swagger_server.controllers.recambios_controller
+    post:
+      tags:
+      - Recambios
+      summary: Crea un nuevo recambio
+      description: Genera una nueva pieza de recambio para un taller previamente registrado
+      operationId: upm_aos_recambios_post
+      requestBody:
+        $ref: '#/components/requestBodies/recambiosRB'
+      responses:
+        "201":
+          description: recambio creado
+          headers:
+            Location:
+              $ref: '#/components/headers/Location'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Recambios'
+        "422":
+          description: "UNPROCESSABLE ENTITY: falta la referencia o las unidades"
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/HTTP_Problem'
+              examples:
+                response-http-422:
+                  $ref: '#/components/examples/response-http-422'
+      x-openapi-router-controller: swagger_server.controllers.recambios_controller
+    options:
+      tags:
+      - Recambios
+      summary: Proporciona la lista de los métodos HTTP soportados.
+      description: Devuelve una cabecera Allow con la lista de métodos HTTP soportados
+        (separados por comas).
+      operationId: upm_aos_recambios_coptions
+      responses:
+        "204":
+          description: cabecera Allow &lt;El cuerpo de la respuesta está vacío&gt;
+          headers:
+            Allow:
+              $ref: '#/components/headers/Allow'
+      x-openapi-router-controller: swagger_server.controllers.recambios_controller
+  /recambios/{recambioId}:
+    get:
+      tags:
+      - Recambios
+      summary: Recupera una pieza de recambio específico identificado por su ID.
+      description: Devuelve el recambio identificado por recambioId.
+      operationId: upm_aos_recambio_get
+      parameters:
+      - name: recambioId
+        in: path
+        description: ID del recambio
+        required: true
+        style: simple
+        explode: false
+        schema:
+          pattern: ^\d+$
+          type: integer
+      responses:
+        "200":
+          description: Recambio
+          headers:
+            ETag:
+              $ref: '#/components/headers/ETag'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Recambios'
+        "404":
+          description: "`NOT FOUND`: recurso no disponible"
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/HTTP_Problem'
+              examples:
+                response-http-404:
+                  $ref: '#/components/examples/response-http-404'
+      x-openapi-router-controller: swagger_server.controllers.recambios_controller
+    put:
+      tags:
+      - Recambios
+      summary: Modifica un recambio.
+      description: Actualiza un recambio identificado por recambioId.
+      operationId: upm_aos_recambio_put
+      parameters:
+      - name: recambioId
+        in: path
+        description: ID del recambio
+        required: true
+        style: simple
+        explode: false
+        schema:
+          pattern: ^\d+$
+          type: integer
+      - name: If_Match
+        in: header
+        description: ETag del recurso que se desea modificar
+        required: true
+        style: simple
+        explode: false
+        schema:
+          pattern: "[0-9a-f]*"
+          type: string
+      requestBody:
+        $ref: '#/components/requestBodies/recambiosRB'
+      responses:
+        "200":
+          description: "OK: el recambio ha sido modificada"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Recambios'
+        "404":
+          description: "`NOT FOUND`: recurso no disponible"
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/HTTP_Problem'
+              examples:
+                response-http-404:
+                  $ref: '#/components/examples/response-http-404'
+        "412":
+          description: "PRECONDITION FAILED: no se cumple alguna condición previa"
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/HTTP_Problem'
+              examples:
+                response-http-412:
+                  $ref: '#/components/examples/response-http-412'
+      x-openapi-router-controller: swagger_server.controllers.recambios_controller
+    delete:
+      tags:
+      - Recambios
+      summary: Elimina un recambio.
+      description: Elimina el recambio identificado por recambioId.
+      operationId: upm_aos_recambio_delete
+      parameters:
+      - name: recambioId
+        in: path
+        description: ID del recambio
+        required: true
+        style: simple
+        explode: false
+        schema:
+          pattern: ^\d+$
+          type: integer
+      responses:
+        "204":
+          description: Recambio eliminado &lt;Cuerpo de la respuesta vacío&gt;
+        "404":
+          description: "`NOT FOUND`: recurso no disponible"
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/HTTP_Problem'
+              examples:
+                response-http-404:
+                  $ref: '#/components/examples/response-http-404'
+      x-openapi-router-controller: swagger_server.controllers.recambios_controller
+    options:
+      tags:
+      - Recambios
+      summary: Proporciona la lista de los métodos HTTP soportados.
+      description: Devuelve una cabecera Allow con la lista de métodos HTTP soportados
+        (separados por comas).
+      operationId: upm_aos_recambio_options
+      parameters:
+      - name: recambioId
+        in: path
+        description: ID del recambio
+        required: true
+        style: simple
+        explode: false
+        schema:
+          pattern: ^\d+$
+          type: integer
+      responses:
+        "204":
+          description: cabecera Allow &lt;El cuerpo de la respuesta está vacío&gt;
+          headers:
+            Allow:
+              $ref: '#/components/headers/Allow2'
+      x-openapi-router-controller: swagger_server.controllers.recambios_controller
+components:
+  schemas:
+    Recambios:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Id pieza de recambio
+          format: int32
+          readOnly: true
+        tallerId:
+          type: integer
+          description: taller Id
+          format: int32
+          readOnly: true
+        ref:
+          type: integer
+          description: Ref. del artículo solicitado
+          format: int32
+        unidades:
+          minimum: 1
+          type: integer
+          description: Número de unidades de la referencia
+          format: int32
+        links:
+          $ref: '#/components/schemas/Recambios_links'
+      description: Recambios
+      example:
+        id: 2021
+        tallerId: 80
+        ref: 1909
+        unidades: 2
+        links:
+          parent:
+            href: /api/v1/recambios
+            rel: listaRecambios
+          self:
+            href: /api/v1/recambios/2021
+            rel: modificar cancelar
+    HTTP_Problem:
+      type: object
+      properties:
+        type:
+          type: string
+          description: "A URI reference [RFC3986] that identifies the problem type"
+          format: uri
+        title:
+          type: string
+          description: short human-readable summary of the problem type
+        status:
+          type: number
+          description: HTTP status code
+        detail:
+          type: string
+          description: human-readable explanation specific to this occurrence of the
+            problem
+        instance:
+          type: string
+          description: A URI reference that identifies the specific occurrence of
+            the problem.  It may or may not yield further information if dereferenced
+          format: uri
+      description: Problem Details for HTTP APIs
+      externalDocs:
+        url: https://tools.ietf.org/html/rfc7807
+    inline_response_200:
+      type: object
+      properties:
+        recambios:
+          type: array
+          description: aray de recambios
+          items:
+            $ref: '#/components/schemas/Recambios'
+      example:
+        recambios:
+        - id: 2021
+          tallerId: 80
+          ref: 1909
+          unidades: 2
+          links:
+            parent:
+              href: /api/v1/recambios
+              rel: listaRecambios
+            self:
+              href: /api/v1/recambios/2021
+              rel: modificar cancelar
+        - id: 2021
+          tallerId: 80
+          ref: 1909
+          unidades: 2
+          links:
+            parent:
+              href: /api/v1/recambios
+              rel: listaRecambios
+            self:
+              href: /api/v1/recambios/2021
+              rel: modificar cancelar
+    Recambios_links_parent:
+      type: object
+      properties:
+        href:
+          type: string
+          description: URL del enlace
+          format: url
+          x-faker: internet.url
+        rel:
+          type: string
+          description: Relación del documento enlazado con el actual. Contiene una
+            lista de tipos de enlaces separados por espacio.
+          x-faker: lorem.words
+      description: Enlace de relación
+    Recambios_links:
+      type: object
+      properties:
+        parent:
+          $ref: '#/components/schemas/Recambios_links_parent'
+        self:
+          $ref: '#/components/schemas/Recambios_links_parent'
+      description: Enlaces de relación
+  responses:
+    Response_404:
+      description: "`NOT FOUND`: recurso no disponible"
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/HTTP_Problem'
+          examples:
+            response-http-404:
+              $ref: '#/components/examples/response-http-404'
+    Response_422:
+      description: "UNPROCESSABLE ENTITY: falta la referencia o las unidades"
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/HTTP_Problem'
+          examples:
+            response-http-422:
+              $ref: '#/components/examples/response-http-422'
+    Response_412:
+      description: "PRECONDITION FAILED: no se cumple alguna condición previa"
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/HTTP_Problem'
+          examples:
+            response-http-412:
+              $ref: '#/components/examples/response-http-412'
+  parameters:
+    recambioId:
+      name: recambioId
+      in: path
+      description: ID del recambio
+      required: true
+      style: simple
+      explode: false
+      schema:
+        pattern: ^\d+$
+        type: integer
+    ifMatchParam:
+      name: If_Match
+      in: header
+      description: ETag del recurso que se desea modificar
+      required: true
+      style: simple
+      explode: false
+      schema:
+        pattern: "[0-9a-f]*"
+        type: string
+  examples:
+    Recambios:
+      value:
+      - id: 3011
+        tallerId: 80
+        ref: 1996
+        unidades: 2
+        links:
+          parent:
+            href: /api/v1/Recambios
+            rel: listaRecambios
+          self:
+            href: /api/v1/Recambios/3011
+            rel: obtener modificar eliminar
+      - id: 3012
+        tallerId: 80
+        ref: 7410
+        unidades: 4
+        links:
+          parent:
+            href: /api/v1/Recambios
+            rel: listaRecambios
+          self:
+            href: /api/v1/Recambios/3012
+            rel: obtener modificar eliminar
+      - id: 3013
+        tallerId: 80
+        ref: 1458
+        unidades: 1
+        links:
+          parent:
+            href: /api/v1/Recambios
+            rel: listaRecambios
+          self:
+            href: /api/v1/Recambios/3013
+            rel: obtener modificar eliminar
+      - id: 3014
+        tallerId: 80
+        ref: 6714
+        unidades: 10
+        links:
+          parent:
+            href: /api/v1/Recambios
+            rel: listaRecambios
+          self:
+            href: /api/v1/Recambios/3014
+            rel: obtener modificar eliminar
+    response-http-404:
+      value:
+        type: https://httpstatuses.com/404
+        title: NOT FOUND
+        status: 404
+        detail: El recurso solicitado no está disponible...
+        instance: about:blank
+    response-http-422:
+      value:
+        type: https://httpstatuses.com/422
+        title: UNPROCESSABLE ENTITY
+        status: 422
+        detail: Falta la referencia o las unidades...
+        instance: about:blank
+    response-http-412:
+      value:
+        type: https://httpstatuses.com/412
+        title: PRECONDITION FAILED
+        status: 412
+        detail: No se cumple alguna condición previa...
+        instance: about:blank
+  requestBodies:
+    recambiosRB:
+      description: Recambios data
+      content:
+        application/json:
+          schema:
+            required:
+            - ref
+            - tallerId
+            - unidades
+            type: object
+            properties:
+              tallerId:
+                type: integer
+                description: taller Id
+                format: int32
+              ref:
+                type: integer
+                description: Ref. del artículo solicitado
+                format: int32
+              unidades:
+                minimum: 1
+                type: integer
+                description: Número de unidades de la referencia
+                format: int32
+            example:
+              tallerId: 2030
+              ref: 33
+              unidades: 12
+      required: true
+  headers:
+    ETag:
+      description: Entity Tag (identificador único proporcionado para validación de
+        caché)
+      style: simple
+      explode: false
+      schema:
+        pattern: "[0-9a-f]*"
+        type: string
+        example: 33a64df551425fcc
+        x-faker: random.uuid
+    Location:
+      description: URI del nuevo recurso
+      style: simple
+      explode: false
+      schema:
+        type: string
+        format: url
+        example: /api/v1/recambios/1936
+        x-faker: internet.url
+    Allow:
+      description: Lista de métodos HTTP soportados
+      style: simple
+      explode: false
+      schema:
+        type: string
+      example: "CGET,POST,OPTIONS"
+    Allow2:
+      description: Lista de métodos HTTP soportados
+      style: simple
+      explode: false
+      schema:
+        type: string
+      example: "GET,PUT,DELETE,OPTIONS"
+
